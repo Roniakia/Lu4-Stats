@@ -4,7 +4,7 @@ This standalone branch contains only the MW2 parser and publisher for the `data`
 
 ## Docker deployment
 
-The container collects immediately at startup, then every 15 minutes, and publishes snapshots to the `data` branch. It has no dashboard, Electron app, or app database.
+The container collects immediately at startup, then every 15 minutes, and publishes snapshots to the `data` branch. It compares player, clan, and castle stats with the latest published snapshot for each server and only commits/pushes servers whose parsed stats changed. If every server is unchanged, the scheduled run exits without a GitHub commit or push. It has no dashboard, Electron app, or app database.
 
 Requirements: Docker Engine with Compose v2 and a dedicated SSH deploy key with write access to `Roniakia/Lu4-Stats`. The Playwright base image includes Chromium and its Linux libraries. Its version is pinned to the Playwright version in `package-lock.json`.
 
