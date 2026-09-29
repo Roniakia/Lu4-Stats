@@ -18,9 +18,9 @@ services:
       - ${GITHUB_SSH_KEY_PATH:-/mnt/user/appdata/lu4-stats-snapshot-publisher/github_deploy_key}:/run/secrets/github_deploy_key:ro
     shm_size: 1gb
     tmpfs:
-      - /tmp:size=1gb
-      - /home/pwuser/.cache:size=512m,uid=1000,gid=1000
-      - /run/publisher-ssh:size=16m
+      - /tmp:size=1073741824
+      - /home/pwuser/.cache:size=536870912,uid=1000,gid=1000
+      - /run/publisher-ssh:size=16777216
     cap_drop:
       - ALL
     cap_add:
