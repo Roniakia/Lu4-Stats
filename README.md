@@ -26,6 +26,6 @@ docker compose up -d --build
 docker compose logs -f snapshot-publisher
 ```
 
-The SSH private key is mounted read-only at runtime and is not copied into the image. GitHub host verification uses GitHub's published Ed25519 host key. The publisher runs as a non-root user inside the container's seccomp profile. Chromium's own sandbox is disabled by default because Unraid hosts may block the namespace operations it needs; set `CHROMIUM_SANDBOX=true` in `.env` on a host where Chromium sandboxing works. To stop it, run `docker compose down`.
+The SSH private key is mounted read-only at runtime and is not copied into the image. GitHub host verification uses GitHub's published Ed25519 host key. The publisher runs as a non-root user with Docker's default seccomp filter and `no-new-privileges`. Chromium's own sandbox is disabled by default because Unraid hosts may block the namespace operations it needs; set `CHROMIUM_SANDBOX=true` in `.env` on a host where Chromium sandboxing works. To stop it, run `docker compose down`.
 
 Set `PUBLISH_INTERVAL_SECONDS` in `.env` to change the interval (default 900 seconds). The scheduler runs once immediately, then targets a 15-minute start-to-start interval without overlapping collections. Rating page requests are spaced by at least five seconds. On HTTP 429, the current collection aborts without a push; wait for MW2's cooldown and increase the interval if rate limiting continues.

@@ -30,4 +30,3 @@ services:
       - SETUID
     security_opt:
       - no-new-privileges:true
-      - seccomp=./seccomp_profile.json
