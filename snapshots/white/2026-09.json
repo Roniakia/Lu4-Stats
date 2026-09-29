@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "white:2026-09",
+  "server": "white",
+  "updatedAt": "2026-09-29T03:10:07.992Z",
+  "snapshots": [
+    {
+      "id": "white-2026-09-29T03-10-07-992Z",
+      "capturedAt": "2026-09-29T03:10:07.992Z",
+      "url": "white/white-2026-09-29T03-10-07-992Z.json"
+    }
+  ]
+}
