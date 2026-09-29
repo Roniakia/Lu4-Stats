@@ -1,0 +1,13 @@
+.env
+.env.*
+.git
+.ssh
+node_modules
+data
+desktop
+public
+src
+.DS_Store
+npm-debug.log
+*.key
+*.log

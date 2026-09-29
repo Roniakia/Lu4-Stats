@@ -488,7 +488,11 @@ function findBrowserExecutable() {
     '/usr/bin/chromium-browser',
   ].filter(Boolean);
 
-  return candidates.find(existsSync) ?? null;
+  const detected = candidates.find(existsSync);
+  if (detected) return detected;
+
+  const bundledBrowser = chromium.executablePath();
+  return existsSync(bundledBrowser) ? bundledBrowser : null;
 }
 
 async function launchBrowser() {
@@ -503,6 +507,7 @@ async function launchBrowser() {
   return chromium.launch({
     executablePath,
     headless: true,
+    chromiumSandbox: process.env.CHROMIUM_SANDBOX === 'true',
   });
 }
 
