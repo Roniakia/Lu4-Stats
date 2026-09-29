@@ -58,56 +58,6 @@ function snapshotIdentifier(snapshot) {
   return `${snapshot.serverKey}-${timestamp.replace(/[^0-9TZ]/g, '-')}`;
 }
 
-function canonicalize(value) {
-  if (Array.isArray(value)) {
-    return value.map(canonicalize).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
-  }
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]));
-  }
-  return value;
-}
-
-function statsSignature(snapshot) {
-  // Ignore capture time and source URLs: only publish when the actual parsed
-  // player, clan, or castle data differs from the latest published snapshot.
-  return JSON.stringify(canonicalize({
-    players: snapshot.players ?? [],
-    clans: snapshot.clans ?? [],
-    castles: snapshot.castles ?? [],
-  }));
-}
-
-async function latestPublishedSnapshot(directory, manifest, serverKey) {
-  const serverPartitions = manifest.partitions
-    .filter((partition) => partition.server === serverKey)
-    .sort((a, b) => String(b.updatedAt ?? '').localeCompare(String(a.updatedAt ?? '')));
-  let latest = null;
-
-  for (const partitionInfo of serverPartitions) {
-    const partitionPath = join(directory, feedDirectory, serverKey, `${partitionInfo.id.split(':').at(-1)}.json`);
-    let partition;
-    try {
-      partition = JSON.parse(await readFile(partitionPath, 'utf8'));
-    } catch (error) {
-      throw new Error(`Could not read published snapshot partition ${partitionInfo.id}: ${error.message}`);
-    }
-    if (!Array.isArray(partition.snapshots)) {
-      throw new Error(`Snapshot partition ${partitionInfo.id} has an invalid format`);
-    }
-    for (const entry of partition.snapshots) {
-      if (!latest || Date.parse(entry.capturedAt) > Date.parse(latest.capturedAt)) latest = entry;
-    }
-  }
-
-  if (!latest) return null;
-  try {
-    return JSON.parse(await readFile(join(directory, feedDirectory, latest.url), 'utf8'));
-  } catch (error) {
-    throw new Error(`Could not read latest published snapshot ${latest.id}: ${error.message}`);
-  }
-}
-
 async function publish() {
   const releaseLock = await acquireLock();
   let workDirectory;
@@ -135,19 +85,9 @@ async function publish() {
       throw new Error('The data branch has an invalid snapshots/index.json manifest');
     }
 
-    const changedSnapshots = [];
-    for (const snapshot of snapshots) {
-      const previous = await latestPublishedSnapshot(workDirectory, manifest, snapshot.serverKey);
-      if (!previous || statsSignature(previous) !== statsSignature(snapshot)) changedSnapshots.push(snapshot);
-    }
-    if (!changedSnapshots.length) {
-      console.log(`No player, clan, or castle changes. Skipping commit and push; checked ${snapshots.length} servers.`);
-      return;
-    }
-
     const partitions = new Map(manifest.partitions.map((partition) => [partition.id, partition]));
     const published = [];
-    for (const snapshot of changedSnapshots) {
+    for (const snapshot of snapshots) {
       const id = snapshotIdentifier(snapshot);
       const month = snapshot.capturedAt.slice(0, 7);
       const partitionId = `${snapshot.serverKey}:${month}`;

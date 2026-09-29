@@ -4,9 +4,11 @@ This standalone branch contains only the MW2 parser and publisher for the `data`
 
 ## Docker deployment
 
-The container collects immediately at startup, then every 15 minutes, and publishes snapshots to the `data` branch. It compares player, clan, and castle stats with the latest published snapshot for each server and only commits/pushes servers whose parsed stats changed. If every server is unchanged, the scheduled run exits without a GitHub commit or push. It has no dashboard, Electron app, or app database.
+The container collects immediately at startup, then every 15 minutes, and publishes a timestamped snapshot for every server to the `data` branch. It records each collection even when the stats are unchanged, so historical date/time analysis can use every scheduled observation. It has no dashboard, Electron app, or app database.
 
 Requirements: Docker Engine with Compose v2 and a dedicated SSH deploy key with write access to `Roniakia/Lu4-Stats`. The Playwright base image includes Chromium and its Linux libraries. Its version is pinned to the Playwright version in `package-lock.json`.
+
+This is designed to run as a regular Docker Compose service on an Unraid server. Store the Compose project and SSH deploy key in a persistent Unraid appdata location, then set `GITHUB_SSH_KEY_PATH` and `GITHUB_KNOWN_HOSTS_PATH` to their host paths. Snapshot history lives on GitHub's `data` branch, so the container itself does not need a persistent data volume.
 
 After pushing this branch, clone it on the server and configure the host SSH paths:
 
