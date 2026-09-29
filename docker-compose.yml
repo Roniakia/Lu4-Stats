@@ -8,7 +8,7 @@ services:
     environment:
       HOME: /home/pwuser
       PUBLISH_INTERVAL_SECONDS: ${PUBLISH_INTERVAL_SECONDS:-900}
-      CHROMIUM_SANDBOX: ${CHROMIUM_SANDBOX:-true}
+      CHROMIUM_SANDBOX: ${CHROMIUM_SANDBOX:-false}
       SNAPSHOT_GIT_REMOTE: ${SNAPSHOT_GIT_REMOTE:-git@github.com:Roniakia/Lu4-Stats.git}
       SNAPSHOT_GIT_BRANCH: ${SNAPSHOT_GIT_BRANCH:-data}
       SNAPSHOT_GIT_NAME: ${SNAPSHOT_GIT_NAME:-Lu4 Stats Snapshot Bot}
