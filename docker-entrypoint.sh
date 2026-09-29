@@ -10,6 +10,7 @@ if [ ! -f "$source_key" ] || [ ! -r "$source_key" ]; then
 fi
 
 mkdir -p /run/publisher-ssh
+chmod 700 /run/publisher-ssh
 install -o pwuser -g pwuser -m 600 "$source_key" "$private_key"
 
 export GIT_SSH_COMMAND="ssh -i $private_key -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/ssh/ssh_known_hosts"
