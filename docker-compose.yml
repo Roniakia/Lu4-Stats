@@ -1,10 +1,6 @@
 services:
   snapshot-publisher:
-    build:
-      context: .
-      args:
-        PUBLISHER_UID: ${PUBLISHER_UID:-1000}
-        PUBLISHER_GID: ${PUBLISHER_GID:-1000}
+    build: .
     image: lu4-stats-snapshot-publisher:local
     init: true
     restart: unless-stopped
@@ -18,19 +14,20 @@ services:
       SNAPSHOT_GIT_NAME: ${SNAPSHOT_GIT_NAME:-Lu4 Stats Snapshot Bot}
       SNAPSHOT_GIT_EMAIL: ${SNAPSHOT_GIT_EMAIL:-lu4-stats-bot@users.noreply.github.com}
       MW2_BASE_URL: ${MW2_BASE_URL:-https://mw2.global}
-      GIT_SSH_COMMAND: >-
-        ssh -i /run/secrets/github_deploy_key -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=15
-        -o StrictHostKeyChecking=yes
-        -o UserKnownHostsFile=/home/pwuser/.ssh/known_hosts
     volumes:
-      - ${GITHUB_SSH_KEY_PATH:?Set GITHUB_SSH_KEY_PATH in .env}:/run/secrets/github_deploy_key:ro
-      - ${GITHUB_KNOWN_HOSTS_PATH:?Set GITHUB_KNOWN_HOSTS_PATH in .env}:/home/pwuser/.ssh/known_hosts:ro
+      - ${GITHUB_SSH_KEY_PATH:-/mnt/user/appdata/lu4-stats-snapshot-publisher/github_deploy_key}:/run/secrets/github_deploy_key:ro
     shm_size: 1gb
     tmpfs:
       - /tmp:size=1gb,mode=1777
-      - /home/pwuser/.cache:size=512m,uid=${PUBLISHER_UID:-1000},gid=${PUBLISHER_GID:-1000}
+      - /home/pwuser/.cache:size=512m,uid=1000,gid=1000
+      - /run/publisher-ssh:size=16m,mode=0700
     cap_drop:
       - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
     security_opt:
       - no-new-privileges:true
       - seccomp=./seccomp_profile.json

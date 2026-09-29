@@ -1,26 +1,21 @@
 FROM mcr.microsoft.com/playwright:v1.63.0-noble
 
-ARG PUBLISHER_UID=1000
-ARG PUBLISHER_GID=1000
-
 USER root
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git openssh-client \
-    && rm -rf /var/lib/apt/lists/* \
-    && if [ "$(id -g pwuser)" != "${PUBLISHER_GID}" ]; then groupmod --gid "${PUBLISHER_GID}" pwuser; fi \
-    && if [ "$(id -u pwuser)" != "${PUBLISHER_UID}" ]; then usermod --uid "${PUBLISHER_UID}" --gid "${PUBLISHER_GID}" pwuser; fi \
-    && chown -R "${PUBLISHER_UID}:${PUBLISHER_GID}" /home/pwuser
+    && apt-get install -y --no-install-recommends git openssh-client gosu \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV HOME=/home/pwuser
 WORKDIR /home/pwuser/app
 
-COPY --chown=${PUBLISHER_UID}:${PUBLISHER_GID} package.json package-lock.json ./
+COPY --chown=pwuser:pwuser package.json package-lock.json ./
 RUN npm ci --omit=dev
-COPY --chown=${PUBLISHER_UID}:${PUBLISHER_GID} . .
+COPY --chown=pwuser:pwuser . .
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY github_known_hosts /etc/ssh/ssh_known_hosts
 
-RUN mkdir -p /home/pwuser/.ssh \
-    && chmod 700 /home/pwuser/.ssh \
-    && chown "${PUBLISHER_UID}:${PUBLISHER_GID}" /home/pwuser/.ssh
+RUN chmod 755 /usr/local/bin/docker-entrypoint.sh \
+    && chmod 644 /etc/ssh/ssh_known_hosts
 
-USER pwuser
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["node", "scheduler.js"]
