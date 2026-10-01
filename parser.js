@@ -7,6 +7,7 @@ import { SERVER_KEYS, SERVERS, normalizeServerKey } from './servers.js';
 
 const BASE_URL = MW2_BASE_URL;
 const RATING_URL = `${BASE_URL}/panel/rating/index?type=pvp`;
+const EXP_URL = `${BASE_URL}/panel/rating/index?type=exp`;
 const CLAN_PVP_URL = `${BASE_URL}/panel/rating/index?type=clan-pvp`;
 const CASTLE_URL = `${BASE_URL}/panel/rating/index?type=castle`;
 const MIN_RATING_PAGE_INTERVAL_MS = 5_000;
@@ -22,7 +23,7 @@ const CLASS_NAMES = [
   'Spellsinger', 'Spellhowler', 'Necromancer', 'Warlock', 'Sorcerer',
   'Gladiator', 'Warlord', 'Destroyer', 'Tyrant', 'Overlord', 'Warcryer',
   'Bishop', 'Prophet', 'Paladin', 'Berserker', 'Inspector', 'Judicator',
-  'Hawkeye', 'Warsmith', 'Dark Elf Fighter',
+  'Hawkeye', 'Warsmith', 'Dark Elf Fighter', 'Terramancer',
 ].sort((a, b) => b.length - a.length);
 
 function clean(value) {
@@ -475,6 +476,48 @@ function matchPlayerClans(players, clans) {
   }));
 }
 
+// Preserve PvP records and ranks; only EXP-only names receive synthetic ranks.
+export function mergeExpPlayers(pvpPlayers, expPlayers) {
+  const knownNames = new Set(pvpPlayers.map(player => clean(player.name).toLowerCase()));
+  const additions = [];
+  for (const player of expPlayers) {
+    const name = clean(player.name).toLowerCase();
+    if (!name || knownNames.has(name)) continue;
+    knownNames.add(name);
+    additions.push(player);
+  }
+  additions.sort((a, b) => (b.pvp ?? -1) - (a.pvp ?? -1) || a.rank - b.rank);
+  return [...pvpPlayers, ...additions.map((player, index) => ({ ...player, rank: 1000 + index }))];
+}
+
+async function fetchExpPlayers(page, serverKey) {
+  await openRatingPage(page, EXP_URL, serverKey);
+  const $ = await parsePage(page);
+  const server = normalizeServerKey(detectServerFromText($('h2').first().text()) ?? '');
+  if (server !== serverKey) {
+    throw new Error(`Requested EXP for ${serverKey}, but MW2 returned ${server ?? 'unknown'}`);
+  }
+  const players = parseExpPlayers($);
+  if (!players.length) throw new Error(`Parsed 0 EXP players for ${SERVERS[serverKey].name}`);
+  return players;
+}
+
+export function parseExpPlayers($) {
+  const byRank = new Map(parseFeaturedPlayers($).map(player => [player.rank, player]));
+  for (const player of parsePlayerTable($)) {
+    const featured = byRank.get(player.rank);
+    byRank.set(player.rank, {
+      ...featured,
+      ...player,
+      pvp: player.pvp ?? featured?.pvp ?? null,
+      pk: player.pk ?? featured?.pk ?? null,
+      crest: player.crest ?? featured?.crest ?? null,
+      clan: player.clan ?? featured?.clan ?? null,
+    });
+  }
+  return [...byRank.values()].sort((a, b) => a.rank - b.rank);
+}
+
 function findBrowserExecutable() {
   const candidates = [
     process.env.MW2_BROWSER_EXECUTABLE,
@@ -703,7 +746,7 @@ export async function fetchSnapshot(serverKey) {
       });
     }
 
-    const players = matchPlayerClans([...playersByRank.values()].sort((a, b) => a.rank - b.rank), clans);
+    let players = matchPlayerClans([...playersByRank.values()].sort((a, b) => a.rank - b.rank), clans);
     if (players.length === 0) {
       const tables = await page.locator('table').evaluateAll((tables) => tables.map((table) => ({
         headers: Array.from(table.querySelectorAll('tr')).slice(0, 3).map((row) =>
@@ -713,6 +756,8 @@ export async function fetchSnapshot(serverKey) {
       })));
       throw new Error(`Parsed 0 players for ${SERVERS[serverKey].name}. Table diagnostics: ${JSON.stringify(tables)}`);
     }
+
+    players = matchPlayerClans(mergeExpPlayers(players, await fetchExpPlayers(page, serverKey)), clans);
 
     return {
       server: SERVERS[serverKey].name,
@@ -776,7 +821,7 @@ export async function fetchAllSnapshots() {
           });
         }
 
-        const players = matchPlayerClans([...playersByRank.values()].sort((a, b) => a.rank - b.rank), clans);
+        let players = matchPlayerClans([...playersByRank.values()].sort((a, b) => a.rank - b.rank), clans);
         if (players.length === 0) {
           const tables = await page.locator('table').evaluateAll((tables) => tables.map((table) => ({
             headers: Array.from(table.querySelectorAll('tr')).slice(0, 3).map((row) =>
@@ -786,6 +831,8 @@ export async function fetchAllSnapshots() {
           })));
           throw new Error(`Parsed 0 players for ${SERVERS[serverKey].name}. Table diagnostics: ${JSON.stringify(tables)}`);
         }
+
+        players = matchPlayerClans(mergeExpPlayers(players, await fetchExpPlayers(page, serverKey)), clans);
 
         results.push({
           server: SERVERS[serverKey].name,
