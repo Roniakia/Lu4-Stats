@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "gamma:2026-10",
+  "server": "gamma",
+  "updatedAt": "2026-10-01T00:07:56.981Z",
+  "snapshots": [
+    {
+      "id": "gamma-2026-10-01T00-07-56-981Z",
+      "capturedAt": "2026-10-01T00:07:56.981Z",
+      "url": "gamma/gamma-2026-10-01T00-07-56-981Z.json"
+    }
+  ]
+}
