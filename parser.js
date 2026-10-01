@@ -179,19 +179,15 @@ function titleFromCell($, cell) {
 }
 
 function playerCrest($, playerName) {
-  let crest = null;
-  const target = playerName.toLowerCase();
-  $('a[href*="/images/crest/"], img[src*="/images/crest/"], img[data-src*="/images/crest/"]').each((_, node) => {
-    if (crest) return;
-    let current = $(node);
-    for (let depth = 0; depth < 18 && current.length; depth++, current = current.parent()) {
-      if (clean(current.text()).toLowerCase().includes(target)) {
-        crest = crestKey($, node);
-        break;
-      }
-    }
-  });
-  return crest;
+  const target = clean(playerName).toLowerCase();
+  const card = $('.hero-content').toArray().find(node =>
+    $(node).find('b').toArray().some(name => clean($(name).text()).toLowerCase() === target)
+  );
+  // Stay inside the exact player's card. A shared ancestor can contain other
+  // players' crests, including when this player has no clan at all.
+  if (!card) return null;
+  const crest = $(card).find('a[href*="/images/crest/"], img[src*="/images/crest/"], img[data-src*="/images/crest/"], img[data-lazy-src*="/images/crest/"]').first();
+  return crest.length ? crestKey($, crest) : null;
 }
 
 function parsePlayerRows($, rows, headerRowIndex = 0) {
