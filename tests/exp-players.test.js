@@ -32,3 +32,11 @@ test('EXP-only players follow unchanged PvP players, sorted by PvP from rank 100
   assert.deepEqual(Object.keys(result[2]), Object.keys(exp[3]));
   assert.equal(JSON.stringify({pvp, exp}), before);
 });
+
+const featuredCard = (name, rank, crest) => `<div class="hero-content"><div>${rank}\n${crest ? `<span class="crest"><img src="${crest}"></span>` : ''}<b>${name}</b> (Lv. 75)\n</div><small>Bishop · ${rank} PvP, 0 PK</small>\n</div>`;
+
+test('featured players get only their own crest, never a sibling card crest', () => {
+  const page = `<body><section>${featuredCard('AnnaLong', 1, '/images/crest/first.png')}${featuredCard('Anna', 2, '/images/crest/second.png')}${featuredCard('NoClan', 3, null)}</section></body>`;
+  const players = parseExpPlayers(cheerio.load(page));
+  assert.deepEqual(players.map(p => [p.name, p.crest]), [['AnnaLong', '/images/crest/first.png'], ['Anna', '/images/crest/second.png'], ['NoClan', null]]);
+});
