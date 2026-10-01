@@ -1,3 +1,4 @@
+import { log } from './logger.js';
 import { MW2_BASE_URL, MW2_USER_AGENT } from './config.js';
 import * as cheerio from 'cheerio';
 import { existsSync } from 'node:fs';
@@ -444,6 +445,7 @@ function parseCastleCards($, clans) {
 }
 
 async function fetchCastleData(page, serverKey, clans) {
+  log(serverKey, 'Collecting castle rating');
   await openRatingPage(page, CASTLE_URL, serverKey);
   const $castles = await parsePage(page);
   const castleServer = normalizeServerKey(detectServerFromText($castles('h2').first().text()) ?? '');
@@ -452,6 +454,7 @@ async function fetchCastleData(page, serverKey, clans) {
   }
   const castles = parseCastleCards($castles, clans);
   if (!castles.length) throw new Error(`Parsed 0 castles for ${SERVERS[serverKey].name}`);
+  log(serverKey, `Parsed ${castles.length} castles`);
   return castles;
 }
 
@@ -491,6 +494,7 @@ export function mergeExpPlayers(pvpPlayers, expPlayers) {
 }
 
 async function fetchExpPlayers(page, serverKey) {
+  log(serverKey, 'Collecting EXP rating');
   await openRatingPage(page, EXP_URL, serverKey);
   const $ = await parsePage(page);
   const server = normalizeServerKey(detectServerFromText($('h2').first().text()) ?? '');
@@ -499,6 +503,7 @@ async function fetchExpPlayers(page, serverKey) {
   }
   const players = parseExpPlayers($);
   if (!players.length) throw new Error(`Parsed 0 EXP players for ${SERVERS[serverKey].name}`);
+  log(serverKey, `Parsed ${players.length} EXP players (${players.filter(player => player.pvp !== null).length} with PvP counts)`);
   return players;
 }
 
@@ -607,7 +612,11 @@ async function openRatingPage(page, url, serverKey) {
   const desiredName = SERVERS[serverKey].name;
 
   const waitForPageInterval = Math.max(0, MIN_RATING_PAGE_INTERVAL_MS - (Date.now() - lastRatingPageRequestAt));
-  if (waitForPageInterval) await page.waitForTimeout(waitForPageInterval);
+  if (waitForPageInterval) {
+    log(serverKey, `Waiting ${waitForPageInterval}ms before next rating request`);
+    await page.waitForTimeout(waitForPageInterval);
+  }
+  log(serverKey, `Opening ${new URL(url).searchParams.get('type')} rating`);
   lastRatingPageRequestAt = Date.now();
   const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30_000 });
   if (response?.status() === 429) {
@@ -632,7 +641,11 @@ async function openRatingPage(page, url, serverKey) {
     ).catch(() => {});
     currentName = await getCurrentServer(page);
   }
-  if (currentName === desiredName) return;
+  if (currentName === desiredName) {
+    log(serverKey, `Verified selected server: ${desiredName}`);
+    return;
+  }
+  log(serverKey, `Switching server from ${currentName ?? 'unknown'} to ${desiredName}`);
 
   // The server picker is still rendered as a button on the rating pages, but
   // its accessible name can differ from the heading (or the heading may not
@@ -693,6 +706,7 @@ async function openRatingPage(page, url, serverKey) {
     throw new Error(`MW2 stayed on ${currentName ?? 'unknown server'} after selecting ${desiredName}`);
   }
 
+  log(serverKey, `Verified selected server: ${desiredName}`);
   return page;
 }
 
@@ -706,11 +720,13 @@ export async function fetchSnapshot(serverKey) {
     throw new Error(`Unsupported server: ${serverKey}`);
   }
 
+  log('parser', 'Launching Chromium');
   const browser = await launchBrowser();
   const context = await browser.newContext({ userAgent: USER_AGENT });
   const page = await context.newPage();
 
   try {
+    log(serverKey, 'Starting snapshot: collecting clan PvP rating');
     await openRatingPage(page, CLAN_PVP_URL, serverKey);
     const $clans = await parsePage(page);
     const clanServer = normalizeServerKey(detectServerFromText($clans('h2').first().text()) ?? '');
@@ -724,7 +740,9 @@ export async function fetchSnapshot(serverKey) {
       throw new Error(`Parsed 0 clans for ${SERVERS[serverKey].name}`);
     }
 
+    log(serverKey, `Parsed ${clans.length} clans`);
     const castles = await fetchCastleData(page, serverKey, clans);
+    log(serverKey, 'Collecting player PvP rating');
     await openRatingPage(page, RATING_URL, serverKey);
     const $players = await parsePage(page);
 
@@ -757,7 +775,10 @@ export async function fetchSnapshot(serverKey) {
       throw new Error(`Parsed 0 players for ${SERVERS[serverKey].name}. Table diagnostics: ${JSON.stringify(tables)}`);
     }
 
+    log(serverKey, `Parsed ${players.length} PvP players (${featured.length} featured, ${tablePlayers.length} table rows)`);
+    const pvpPlayerCount = players.length;
     players = matchPlayerClans(mergeExpPlayers(players, await fetchExpPlayers(page, serverKey)), clans);
+    log(serverKey, `Snapshot complete: ${players.length} players (${players.length - pvpPlayerCount} added from EXP), ${clans.length} clans, ${castles.length} castles`);
 
     return {
       server: SERVERS[serverKey].name,
@@ -780,6 +801,7 @@ export async function fetchSnapshot(serverKey) {
 }
 
 export async function fetchAllSnapshots() {
+  log('parser', 'Launching Chromium');
   const browser = await launchBrowser();
   const context = await browser.newContext({ userAgent: USER_AGENT });
   const results = [];
@@ -788,6 +810,7 @@ export async function fetchAllSnapshots() {
     for (const serverKey of SERVER_KEYS) {
       const page = await context.newPage();
       try {
+        log(serverKey, 'Starting snapshot: collecting clan PvP rating');
         await openRatingPage(page, CLAN_PVP_URL, serverKey);
         const $clans = await parsePage(page);
         const clanServer = normalizeServerKey(detectServerFromText($clans('h2').first().text()) ?? '');
@@ -800,7 +823,9 @@ export async function fetchAllSnapshots() {
           throw new Error(`Parsed 0 clans for ${SERVERS[serverKey].name}`);
         }
 
+        log(serverKey, `Parsed ${clans.length} clans`);
         const castles = await fetchCastleData(page, serverKey, clans);
+        log(serverKey, 'Collecting player PvP rating');
         await openRatingPage(page, RATING_URL, serverKey);
         const $players = await parsePage(page);
         const featured = parseFeaturedPlayers($players);
@@ -832,7 +857,10 @@ export async function fetchAllSnapshots() {
           throw new Error(`Parsed 0 players for ${SERVERS[serverKey].name}. Table diagnostics: ${JSON.stringify(tables)}`);
         }
 
+        log(serverKey, `Parsed ${players.length} PvP players (${featured.length} featured, ${tablePlayers.length} table rows)`);
+        const pvpPlayerCount = players.length;
         players = matchPlayerClans(mergeExpPlayers(players, await fetchExpPlayers(page, serverKey)), clans);
+        log(serverKey, `Snapshot complete: ${players.length} players (${players.length - pvpPlayerCount} added from EXP), ${clans.length} clans, ${castles.length} castles`);
 
         results.push({
           server: SERVERS[serverKey].name,
@@ -860,9 +888,11 @@ export async function fetchAllSnapshots() {
   return results;
 }
 
+
 export async function inspectServerSelector(serverKey) {
   if (!SERVER_KEYS.includes(serverKey)) throw new Error(`Unsupported server: ${serverKey}`);
 
+  log('parser', 'Launching Chromium');
   const browser = await launchBrowser();
   const context = await browser.newContext({ userAgent: USER_AGENT });
   const page = await context.newPage();
