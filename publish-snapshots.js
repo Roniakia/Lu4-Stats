@@ -1,3 +1,4 @@
+import { log } from './logger.js';
 import { execFile as execFileCallback } from 'node:child_process';
 import { mkdtemp, mkdir, open, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -59,10 +60,12 @@ function snapshotIdentifier(snapshot) {
 }
 
 async function publish() {
+  const startedAt = Date.now();
   const releaseLock = await acquireLock();
+  log('publisher', 'Publisher lock acquired');
   let workDirectory;
   try {
-    console.log('Collecting player, clan, and castle data from all servers…');
+    log('publisher', 'Collecting player, clan, and castle data from all servers');
     const snapshots = await fetchAllSnapshots();
     const collectedServers = new Set(snapshots.map((snapshot) => snapshot.serverKey));
     if (snapshots.length !== SERVER_KEYS.length || collectedServers.size !== SERVER_KEYS.length
@@ -71,7 +74,9 @@ async function publish() {
     }
 
     workDirectory = await mkdtemp(join(tmpdir(), 'lu4-stats-data-'));
+    log('publisher', `Collection complete for ${snapshots.length} servers; preparing Git branch ${dataBranch}`);
     await prepareDataBranch(workDirectory);
+    log('publisher', 'Git data checkout ready');
 
     const manifestPath = join(workDirectory, feedDirectory, 'index.json');
     await mkdir(dirname(manifestPath), { recursive: true });
@@ -89,6 +94,7 @@ async function publish() {
     const published = [];
     for (const snapshot of snapshots) {
       const id = snapshotIdentifier(snapshot);
+      log('publisher', `Writing ${snapshot.serverKey}: ${snapshot.players.length} players, ${snapshot.clans.length} clans, ${snapshot.castles.length} castles (${id})`);
       const month = snapshot.capturedAt.slice(0, 7);
       const partitionId = `${snapshot.serverKey}:${month}`;
       const partitionPath = join(workDirectory, feedDirectory, snapshot.serverKey, `${month}.json`);
@@ -152,8 +158,11 @@ async function publish() {
       if (error.code !== 1) throw error;
     }
 
+    log('publisher', `Committing ${published.length} new snapshots`);
     await run('git', ['commit', '--quiet', '-m', `Publish snapshots ${manifest.updatedAt}`], workDirectory);
+    log('publisher', `Pushing snapshots to GitHub branch ${dataBranch}`);
     await run('git', ['push', '--quiet', '--set-upstream', 'origin', dataBranch], workDirectory);
+    log('publisher', `Publish succeeded in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
     console.log(JSON.stringify({ ok: true, branch: dataBranch, published, partitions: manifest.partitions.length }, null, 2));
   } finally {
     if (workDirectory) await rm(workDirectory, { recursive: true, force: true });
@@ -162,6 +171,6 @@ async function publish() {
 }
 
 publish().catch((error) => {
-  console.error('Snapshot publishing failed:', error.message);
+  console.error(`[${new Date().toISOString()}] [publisher] Snapshot publishing failed:`, error.message);
   process.exitCode = 1;
 });
