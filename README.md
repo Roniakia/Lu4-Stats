@@ -4,7 +4,7 @@ This standalone branch contains only the MW2 parser and publisher for the `data`
 
 ## Docker deployment
 
-The container collects immediately at startup, then every 15 minutes, and publishes a timestamped snapshot for every server to the `data` branch. It records each collection even when the stats are unchanged, so historical date/time analysis can use every scheduled observation. It has no dashboard, Electron app, or app database.
+The container collects immediately at startup, then every 15 minutes, and publishes a timestamped snapshot for every server to the `data` branch. Clan hall ownership is collected from the dedicated clan hall rating page, stored as `clanHalls` (including unowned halls), and matched into ranked clans’ `clanHall` fields. Hall names include their location when displayed on clans to distinguish halls with the same name. Rebuild and restart the publisher after parser changes to collect this data in future snapshots. It records each collection even when the stats are unchanged, so historical date/time analysis can use every scheduled observation. It has no dashboard, Electron app, or app database.
 
 Requirements: Docker Engine with Compose v2 and a dedicated SSH deploy key with write access to `Roniakia/Lu4-Stats`. The Playwright base image includes Chromium and its Linux libraries. Its version is pinned to the Playwright version in `package-lock.json`.
 

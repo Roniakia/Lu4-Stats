@@ -8,6 +8,7 @@ import { SERVER_KEYS, SERVERS, normalizeServerKey } from './servers.js';
 const BASE_URL = MW2_BASE_URL;
 const RATING_URL = `${BASE_URL}/panel/rating/index?type=pvp`;
 const CLAN_PVP_URL = `${BASE_URL}/panel/rating/index?type=clan-pvp`;
+const CLAN_HALL_URL = `${BASE_URL}/panel/rating/index?type=clan-hall`;
 const CASTLE_URL = `${BASE_URL}/panel/rating/index?type=castle`;
 const MIN_RATING_PAGE_INTERVAL_MS = 5_000;
 let lastRatingPageRequestAt = 0;
@@ -378,6 +379,48 @@ function parseClanTable($) {
   return clans;
 }
 
+export function parseClanHallTable($) {
+  const halls = [];
+  $('table').each((_, table) => {
+    const headers = $(table).find('tr').first().children('th, td').map((__, cell) => normalizeHeader($(cell).text())).get();
+    const nameIndex = headerIndex(headers, [/^clan hall$/, /^обитель клана$/]);
+    const locationIndex = headerIndex(headers, [/^location$/, /^локация$/]);
+    const clanIndex = headerIndex(headers, [/^clan$/, /^клан$/]);
+    if (nameIndex < 0 || locationIndex < 0 || clanIndex < 0) return;
+    $(table).find('tr').slice(1).each((__, row) => {
+      const cells = $(row).children('td').toArray();
+      const name = clean($(cells[nameIndex]).text());
+      if (!name || cells.length <= clanIndex) return;
+      const owner = clean($(cells[clanIndex]).text());
+      halls.push({ name, location: clean($(cells[locationIndex]).text()), owner_clan: owner && owner !== '-' ? owner : null, owner_crest: crestKey($, cells[clanIndex]) });
+    });
+  });
+  return halls;
+}
+
+export function applyClanHallOwners(clans, halls) {
+  const ownership = new Map();
+  for (const hall of halls) {
+    if (!hall.owner_clan) continue;
+    const key = hall.owner_clan.trim().toLowerCase();
+    const names = ownership.get(key) ?? [];
+    names.push(`${hall.name}${hall.location ? ` (${hall.location})` : ''}`);
+    ownership.set(key, names);
+  }
+  for (const clan of clans) clan.clanHall = ownership.get(clan.name.trim().toLowerCase())?.join(' / ') ?? null;
+}
+
+async function fetchClanHallData(page, serverKey, clans) {
+  await openRatingPage(page, CLAN_HALL_URL, serverKey);
+  const $halls = await parsePage(page);
+  const hallServer = normalizeServerKey(detectServerFromText($halls('h2').first().text()) ?? '');
+  if (hallServer !== serverKey) throw new Error(`Requested clan halls for ${serverKey}, but MW2 returned ${hallServer ?? 'unknown'}`);
+  const halls = parseClanHallTable($halls);
+  if (!halls.length) throw new Error(`Parsed 0 clan halls for ${SERVERS[serverKey].name}`);
+  applyClanHallOwners(clans, halls);
+  return halls;
+}
+
 function parseCastleParticipants($, cell, clanLeaders) {
   const participants = [];
   $(cell).find('span.crest').each((_, crestNode) => {
@@ -681,6 +724,7 @@ export async function fetchSnapshot(serverKey) {
       throw new Error(`Parsed 0 clans for ${SERVERS[serverKey].name}`);
     }
 
+    const clanHalls = await fetchClanHallData(page, serverKey, clans);
     const castles = await fetchCastleData(page, serverKey, clans);
     await openRatingPage(page, RATING_URL, serverKey);
     const $players = await parsePage(page);
@@ -721,10 +765,12 @@ export async function fetchSnapshot(serverKey) {
       players,
       clans,
       castles,
+      clanHalls,
       source: {
         players: RATING_URL,
         clans: CLAN_PVP_URL,
         castles: CASTLE_URL,
+        clanHalls: CLAN_HALL_URL,
         selector: 'MW2 rendered server selector',
       },
     };
@@ -755,6 +801,7 @@ export async function fetchAllSnapshots() {
           throw new Error(`Parsed 0 clans for ${SERVERS[serverKey].name}`);
         }
 
+        const clanHalls = await fetchClanHallData(page, serverKey, clans);
         const castles = await fetchCastleData(page, serverKey, clans);
         await openRatingPage(page, RATING_URL, serverKey);
         const $players = await parsePage(page);
@@ -794,10 +841,12 @@ export async function fetchAllSnapshots() {
           players,
           clans,
           castles,
+          clanHalls,
           source: {
             players: RATING_URL,
             clans: CLAN_PVP_URL,
             castles: CASTLE_URL,
+            clanHalls: CLAN_HALL_URL,
             selector: 'MW2 rendered server selector',
           },
         });
