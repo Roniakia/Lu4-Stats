@@ -1,3 +1,4 @@
+import { log } from './logger.js';
 import { spawn } from 'node:child_process';
 
 const intervalSeconds = Number(process.env.PUBLISH_INTERVAL_SECONDS ?? 900);
@@ -44,6 +45,7 @@ function waitForNextRun(delayMs) {
   });
 }
 
+log('scheduler', `Publisher schedule: every ${intervalSeconds}s, starting immediately`);
 let nextRunAt = Date.now();
 while (!stopping) {
   console.log(`Starting snapshot publish at ${new Date().toISOString()}`);
@@ -53,6 +55,7 @@ while (!stopping) {
 
   nextRunAt += intervalSeconds * 1000;
   if (nextRunAt <= Date.now()) nextRunAt = Date.now() + intervalSeconds * 1000;
+  log('scheduler', `Run finished with exit code ${exitCode}; next run at ${new Date(nextRunAt).toISOString()}`);
   await waitForNextRun(nextRunAt - Date.now());
   wakeScheduler = undefined;
 }
