@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:1
+FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS tools-dependencies
+WORKDIR /app
+COPY database/package*.json ./
+RUN npm ci --omit=dev
+# Tools dependencies are pure JavaScript; install on the build host without
+# requiring an emulator for the target CPU.
+FROM node:22-bookworm-slim AS tools
+WORKDIR /app
+COPY --from=tools-dependencies --chown=node:node /app/package*.json ./
+COPY --from=tools-dependencies --chown=node:node /app/node_modules ./node_modules
+ENV NODE_ENV=production
+COPY database ./database
+COPY scripts ./scripts
+USER node
+ENTRYPOINT ["node"]
+CMD ["scripts/admin/export.mjs","catalog"]
