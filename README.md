@@ -1,31 +1,28 @@
-# Lu4 Stats snapshot publisher
+# Lu4 Stats homelab services
 
-This standalone branch contains only the MW2 parser and publisher for the `data` branch of `Roniakia/Lu4-Stats`. It does not include the Lu4 Stats web app, Electron app, or app database.
+This repository owns the parser, PostgreSQL schema, database ingestion, imports, archives, admin exports and backups. The Next.js app/API is maintained separately in Roniakia/Lu4-Stats-app; no app files or sibling build context are needed here.
 
-## Docker deployment
+## V2 setup
 
-The container collects immediately at startup, then every 15 minutes, and publishes a timestamped snapshot for every server to the `data` branch. Clan hall ownership is collected from the dedicated clan hall rating page, stored as `clanHalls` (including unowned halls), and matched into ranked clans’ `clanHall` fields. Hall names include their location when displayed on clans to distinguish halls with the same name. Rebuild and restart the publisher after parser changes to collect this data in future snapshots. It records each collection even when the stats are unchanged, so historical date/time analysis can use every scheduled observation. It has no dashboard, Electron app, or app database.
-
-Requirements: Docker Engine with Compose v2 and a dedicated SSH deploy key with write access to `Roniakia/Lu4-Stats`. The Playwright base image includes Chromium and its Linux libraries. Its version is pinned to the Playwright version in `package-lock.json`.
-
-This is designed to run as a regular Docker Compose service on an Unraid server. Snapshot history lives on GitHub's `data` branch, so the container itself does not need a persistent data volume. The only required host secret is your GitHub deploy key; GitHub's SSH host key is pinned in the image.
-
-After pushing this branch, clone it on the server:
+Work on branch `codex/v2-homelab`. See [homelab startup](deploy/HOMELAB.md) for private configuration, directory ownership, explicit migrations/roles, backup and the parser handoff. Build on the homelab from this repository root:
 
 ```sh
-git clone --branch snapshot-publisher git@github.com:Roniakia/Lu4-Stats.git
-cd Lu4-Stats
+docker build -f Dockerfile.tools --target tools -t lu4-tools:v2-homelab-amd64 .
+docker build -f Dockerfile.collector -t lu4-collector:v2-homelab-amd64 .
+bash deploy/ops/prepare-homelab.sh
 ```
 
-Create a write-enabled GitHub deploy key with no passphrase and add its public half to `Roniakia/Lu4-Stats`. Place the private key at `/mnt/user/appdata/lu4-stats-snapshot-publisher/github_deploy_key` on Unraid. The container copies it into a private temporary location with restricted permissions and runs the publisher as its unprivileged browser user. If you prefer another host path, set `GITHUB_SSH_KEY_PATH` in a local `.env` file; no UID, GID, or `known_hosts` setup is required.
+All images use this repository alone. Generated credentials remain local and private. Database binding is loopback until a private app-to-homelab tunnel is configured. The app uses the read-only lu4_app role, while the collector uses lu4_collector. Current schema version is1; coordinate incompatible schema changes with the app. The app keeps a test-only schema/ingestion snapshot and read adapter, not operational migrations.
 
-Build and start the container:
+## Legacy publishing
+
+The original `Dockerfile`, `docker-compose.yml`, publisher and scheduler are preserved for the existing GitHub data-branch pipeline. New v2 deployment explicitly uses `deploy/homelab.compose.yml`; do not run both parser schedules at once. No publishing/traffic cutover or deletion has been performed.
+
+## Tests
 
 ```sh
-docker compose up -d --build
-docker compose logs -f snapshot-publisher
+npm ci
+npm run test:homelab
 ```
 
-The SSH private key is mounted read-only at runtime and is not copied into the image. GitHub host verification uses GitHub's published Ed25519 host key. The publisher runs as a non-root user with Docker's default seccomp filter and `no-new-privileges`. Chromium's own sandbox is disabled by default because Unraid hosts may block the namespace operations it needs; set `CHROMIUM_SANDBOX=true` in `.env` on a host where Chromium sandboxing works. To stop it, run `docker compose down`.
-
-Set `PUBLISH_INTERVAL_SECONDS` in `.env` to change the interval (default 900 seconds). The scheduler runs once immediately, then targets a 15-minute start-to-start interval without overlapping collections. Rating page requests are spaced by at least five seconds. On HTTP 429, the current collection aborts without a push; wait for MW2's cooldown and increase the interval if rate limiting continues.
+Optional `TEST_DATABASE_URL` enables native SQL/operations drills against a disposable owner-controlled database. Use PostgreSQL18 CLI tools for dump/restore. Tests create/remove only temporary schemas/databases/roles; fixture collector/importer requests do not contact the live game. The independent homelab GitHub workflow builds both images and verifies first startup, permissions, backup and offline browser ingestion. Native AMD64 host runtime, real-source collection, off-host recovery and network/capacity gates remain pending.

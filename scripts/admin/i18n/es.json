@@ -1,0 +1,19 @@
+{
+  "Lu4 historical export": "Exportación histórica de Lu4",
+  "Recorded observations: {total}. Report sample: {sample}. CSV contains every exported observation.": "Observaciones registradas: {total}. Muestra del informe: {sample}. El CSV contiene todas las observaciones exportadas.",
+  "Charts show sampled observations. Gaps do not establish continuous ranking presence.": "Los gráficos muestran una muestra de observaciones. Los intervalos sin datos no confirman presencia continua en la clasificación.",
+  "Up to 500 matching rows. Select a header to sort.": "Hasta 500 filas coincidentes. Selecciona un encabezado para ordenar.",
+  "{count} matching sampled observations": "{count} observaciones coincidentes de la muestra",
+  "Server": "Servidor",
+  "Observed (UTC)": "Observado (UTC)",
+  "Entity type": "Tipo de entidad",
+  "Name": "Nombre",
+  "PvP": "PvP",
+  "PK": "PK",
+  "Rank": "Posición",
+  "Clan": "Clan",
+  "Search": "Buscar",
+  "From": "Desde",
+  "To": "Hasta",
+  "PvP history": "Historial de PvP"
+}

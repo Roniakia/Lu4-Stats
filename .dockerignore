@@ -11,3 +11,9 @@ src
 npm-debug.log
 *.key
 *.log
+
+archives
+exports
+backups
+deploy/homelab-state
+deploy/artifacts

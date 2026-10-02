@@ -1,0 +1,19 @@
+{
+  "Lu4 historical export": "Історичний експорт Lu4",
+  "Recorded observations: {total}. Report sample: {sample}. CSV contains every exported observation.": "Записано спостережень: {total}. У звіті: {sample}. CSV містить усі експортовані спостереження.",
+  "Charts show sampled observations. Gaps do not establish continuous ranking presence.": "Графіки показують вибірку спостережень. Прогалини не підтверджують безперервну присутність у рейтингу.",
+  "Up to 500 matching rows. Select a header to sort.": "До 500 відповідних рядків. Натисніть заголовок для сортування.",
+  "{count} matching sampled observations": "Відповідних спостережень у вибірці: {count}",
+  "Server": "Сервер",
+  "Observed (UTC)": "Час спостереження (UTC)",
+  "Entity type": "Тип сутності",
+  "Name": "Ім’я",
+  "PvP": "PvP",
+  "PK": "PK",
+  "Rank": "Місце",
+  "Clan": "Клан",
+  "Search": "Пошук",
+  "From": "Від",
+  "To": "До",
+  "PvP history": "Історія PvP"
+}
