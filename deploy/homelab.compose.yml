@@ -104,6 +104,22 @@ services:
       - ${BACKUP_DIRECTORY:?Set protected backup directory}:/backups
     mem_limit: 512m
     cpus: 1
+  restore-drill:
+    image: postgres:18-bookworm
+    profiles: [tools]
+    entrypoint: [bash, /ops/restore-drill.sh]
+    environment:
+      PGHOST: database
+      PGUSER: lu4_migration
+      PGDATABASE: lu4
+      PGPASSWORD_FILE: /run/secrets/database_password
+    secrets: [database_password]
+    volumes:
+      - ./ops:/ops:ro
+      - ${BACKUP_DIRECTORY:?Set protected backup directory}:/backups:ro
+    mem_limit: 1g
+    cpus: 1
+
 secrets:
   database_password:
     file: ${DATABASE_PASSWORD_FILE:?Set password file path}
