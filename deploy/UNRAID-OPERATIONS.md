@@ -30,3 +30,5 @@ Use the actual basename in the backup directory. The drill verifies the checksum
 Passwords are stored in the private homelab.env and matching database-password secret. Keep an encrypted recovery copy outside this machine, preferably in a password manager alongside the setup paths and SSH recovery details. Do not commit them, paste them into logs, or share them. Database dumps do not include role passwords; provision-roles with the protected configuration recreates application role credentials. Editing the owner secret alone does not rotate PostgreSQL's existing owner password.
 
 Back up archives separately from PostgreSQL dumps. Off-host copying, retention, notifications, and reboot validation require host/destination configuration and are pending. Never test an outage by deleting volumes. A reboot test should confirm Docker autostart, database readiness, collector freshness, and laptop tunnel reconnection.
+
+Full operator and replacement-host guide: [ADMIN-RUNBOOK.md](ADMIN-RUNBOOK.md). The helper includes a private-network.compose.yml alongside its env file when present; LU4_COMPOSE_OVERRIDE can override its path.

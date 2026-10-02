@@ -4,7 +4,12 @@ set -euo pipefail
 umask 077
 repository="$(cd "$(dirname "$0")/../.." && pwd)"
 env_file="${LU4_ENV_FILE:-/mnt/user/appdata/lu4-stats-v2/homelab.env}"
-compose() { docker compose -p lu4-homelab --env-file "$env_file" -f "$repository/deploy/homelab.compose.yml" "$@"; }
+compose() {
+  local args=(-p lu4-homelab --env-file "$env_file" -f "$repository/deploy/homelab.compose.yml")
+  local override="${LU4_COMPOSE_OVERRIDE:-$(dirname "$env_file")/private-network.compose.yml}"
+  if [[ -f "$override" ]]; then args+=(-f "$override"); fi
+  docker compose "${args[@]}" "$@"
+}
 case "${1:-status}" in
   status)
     compose ps
