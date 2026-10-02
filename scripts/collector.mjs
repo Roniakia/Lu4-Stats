@@ -6,7 +6,7 @@ import { ingestCollection,validateCollection } from '../database/core.mjs';
 const interval=Number(process.env.COLLECTION_INTERVAL_SECONDS??900);
 if(!Number.isInteger(interval)||interval<60) throw new Error('Collection interval must be at least 60 seconds');
 const timeout=Number(process.env.COLLECTION_TIMEOUT_SECONDS??600);if(!Number.isInteger(timeout)||timeout<60)throw new Error('Collection timeout must be at least 60 seconds');
-const parser=await import(pathToFileURL(resolve(process.env.COLLECTOR_MODULE??'collector/parser.js')).href);
+const parser=await import(pathToFileURL(resolve(process.env.COLLECTOR_MODULE??'parser.js')).href);
 let stopping=false,wake;
 process.on('SIGTERM',()=>{stopping=true;wake?.();});process.on('SIGINT',()=>{stopping=true;wake?.();});
 if(!process.env.COLLECTOR_DATABASE_URL&&!process.env.DATABASE_URL)throw new Error('Set COLLECTOR_DATABASE_URL or DATABASE_URL explicitly');

@@ -7,8 +7,7 @@
     "node": ">=22 <25"
   },
   "scripts": {
-    "publish:snapshots": "node publish-snapshots.js",
-    "start": "node scheduler.js",
+    "start": "node scripts/collector.mjs",
     "db:migrate": "node scripts/migrate.mjs",
     "db:import": "node scripts/import-history.mjs",
     "collector:database": "node scripts/collector.mjs",

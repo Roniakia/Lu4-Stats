@@ -14,9 +14,9 @@ bash deploy/ops/prepare-homelab.sh
 
 All images use this repository alone. Generated credentials remain local and private. Database binding is loopback until a private app-to-homelab tunnel is configured. The app uses the read-only lu4_app role, while the collector uses lu4_collector. Current schema version is1; coordinate incompatible schema changes with the app. The app keeps a test-only schema/ingestion snapshot and read adapter, not operational migrations.
 
-## Legacy publishing
+## Repository scope
 
-The original `Dockerfile`, `docker-compose.yml`, publisher and scheduler are preserved for the existing GitHub data-branch pipeline. New v2 deployment explicitly uses `deploy/homelab.compose.yml`; do not run both parser schedules at once. No publishing/traffic cutover or deletion has been performed.
+This branch contains only the parser, database, migrations, import/archive/export/backup tools, deployment configuration and their tests. It has no Next.js/UI application, GitHub publishing job, SSH deploy-key machinery or legacy publisher Docker files. Previous publishing code remains in the original repository branches/history; running containers are not changed by this checkout. Use deploy/homelab.compose.yml explicitly for the new stack.
 
 ## Tests
 
