@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-10-24T16:26:38.627Z",
+  "updatedAt": "2026-10-24T16:41:36.153Z",
   "partitions": [
     {
       "id": "black:2026-09",
@@ -11,7 +11,7 @@
     {
       "id": "black:2026-10",
       "server": "black",
-      "updatedAt": "2026-10-24T16:25:52.586Z",
+      "updatedAt": "2026-10-24T16:40:51.038Z",
       "url": "black/2026-10.json"
     },
     {
@@ -23,7 +23,7 @@
     {
       "id": "carmine:2026-10",
       "server": "carmine",
-      "updatedAt": "2026-10-24T16:26:18.459Z",
+      "updatedAt": "2026-10-24T16:41:17.277Z",
       "url": "carmine/2026-10.json"
     },
     {
@@ -35,7 +35,7 @@
     {
       "id": "gamma:2026-10",
       "server": "gamma",
-      "updatedAt": "2026-10-24T16:24:59.832Z",
+      "updatedAt": "2026-10-24T16:39:59.677Z",
       "url": "gamma/2026-10.json"
     },
     {
@@ -47,7 +47,7 @@
     {
       "id": "white:2026-10",
       "server": "white",
-      "updatedAt": "2026-10-24T16:25:25.884Z",
+      "updatedAt": "2026-10-24T16:40:25.313Z",
       "url": "white/2026-10.json"
     }
   ]
