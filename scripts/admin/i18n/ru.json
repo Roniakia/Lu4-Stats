@@ -1,0 +1,19 @@
+{
+  "Lu4 historical export": "Исторический экспорт Lu4",
+  "Recorded observations: {total}. Report sample: {sample}. CSV contains every exported observation.": "Записано наблюдений: {total}. В отчёте: {sample}. CSV содержит все экспортированные наблюдения.",
+  "Charts show sampled observations. Gaps do not establish continuous ranking presence.": "Графики показывают выборку наблюдений. Пропуски не подтверждают непрерывное присутствие в рейтинге.",
+  "Up to 500 matching rows. Select a header to sort.": "До 500 подходящих строк. Нажмите на заголовок для сортировки.",
+  "{count} matching sampled observations": "Подходящих наблюдений в выборке: {count}",
+  "Server": "Сервер",
+  "Observed (UTC)": "Время наблюдения (UTC)",
+  "Entity type": "Тип сущности",
+  "Name": "Имя",
+  "PvP": "PvP",
+  "PK": "PK",
+  "Rank": "Место",
+  "Clan": "Клан",
+  "Search": "Поиск",
+  "From": "От",
+  "To": "До",
+  "PvP history": "История PvP"
+}

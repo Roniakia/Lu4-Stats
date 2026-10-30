@@ -1,0 +1,44 @@
+name: Homelab services
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: docker build -f Dockerfile.tools --target tools -t lu4-tools:v2-homelab-amd64 .
+      - run: docker build -f Dockerfile.collector -t lu4-collector:v2-homelab-amd64 .
+      - run: bash deploy/ops/prepare-homelab.sh
+      - run: |
+          lu4() { docker compose -p lu4-homelab-check --env-file deploy/.env -f deploy/homelab.compose.yml "$@"; }
+          lu4 config --quiet
+          lu4 run --rm prepare-storage
+          lu4 up -d --wait database
+          lu4 run --rm migrate
+          lu4 run --rm provision-roles
+          lu4 run --rm admin-export
+          lu4 run --rm backup
+          lu4 run --rm --no-deps --entrypoint node -e HOMELAB_FIXTURE_CHECK=1 -v "$PWD/scripts/homelab-smoke.mjs:/app/scripts/homelab-smoke.mjs:ro" collector scripts/homelab-smoke.mjs
+          lu4 run --rm --no-deps -v "$PWD/tests:/app/tests:ro" admin-export tests/admin-report.cjs
+          lu4 run --rm --no-deps -v "$PWD/tests:/app/tests:ro" admin-export tests/operations.cjs
+      - run: |
+          mkdir -p /tmp/pg-tools
+          for tool in pg_dump pg_restore psql; do
+            printf '%s\n' '#!/usr/bin/env bash' 'tool="$(basename "$0")"' 'exec docker run --rm --network host --user "$(id -u):$(id -g)" -v /tmp:/tmp -e PGHOST -e PGPORT -e PGUSER -e PGPASSWORD -e PGDATABASE postgres:18-bookworm "$tool" "$@"' > "/tmp/pg-tools/$tool"
+            chmod +x "/tmp/pg-tools/$tool"
+          done
+          echo '/tmp/pg-tools' >> "$GITHUB_PATH"
+      - run: |
+          source deploy/.env
+          export TEST_DATABASE_URL="${MIGRATION_DATABASE_URL/@database:/@127.0.0.1:}"
+          npm run test:homelab
+      - if: always()
+        run: docker compose -p lu4-homelab-check --env-file deploy/.env -f deploy/homelab.compose.yml down -v

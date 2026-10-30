@@ -1,0 +1,428 @@
+{
+  "target": "http://188.166.166.159",
+  "release": "f19b2005ed3e9dc9e6a94203c1e87bd67ffe9de1",
+  "stages": [
+    {
+      "concurrency": 1,
+      "mode": "repeat",
+      "namesAvailable": 72,
+      "requests": 33,
+      "elapsedMs": 15177,
+      "rps": 2.17,
+      "p50Ms": 93,
+      "p95Ms": 3074,
+      "maxMs": 3331,
+      "bytes": 2276624,
+      "statuses": {
+        "200": 33
+      },
+      "routes": [
+        {
+          "route": "/api/players",
+          "requests": 7,
+          "p95Ms": 208
+        },
+        {
+          "route": "/api/clans",
+          "requests": 7,
+          "p95Ms": 281
+        },
+        {
+          "route": "/api/player-histories",
+          "requests": 7,
+          "p95Ms": 343
+        },
+        {
+          "route": "/api/feed",
+          "requests": 6,
+          "p95Ms": 3331
+        },
+        {
+          "route": "/api/options",
+          "requests": 6,
+          "p95Ms": 99
+        }
+      ]
+    },
+    {
+      "concurrency": 4,
+      "mode": "repeat",
+      "namesAvailable": 72,
+      "requests": 287,
+      "elapsedMs": 15199,
+      "rps": 18.88,
+      "p50Ms": 57,
+      "p95Ms": 875,
+      "maxMs": 4308,
+      "bytes": 20225938,
+      "statuses": {
+        "200": 287
+      },
+      "routes": [
+        {
+          "route": "/api/clans",
+          "requests": 58,
+          "p95Ms": 772
+        },
+        {
+          "route": "/api/player-histories",
+          "requests": 57,
+          "p95Ms": 800
+        },
+        {
+          "route": "/api/players",
+          "requests": 58,
+          "p95Ms": 469
+        },
+        {
+          "route": "/api/options",
+          "requests": 57,
+          "p95Ms": 777
+        },
+        {
+          "route": "/api/feed",
+          "requests": 57,
+          "p95Ms": 3770
+        }
+      ]
+    },
+    {
+      "concurrency": 8,
+      "mode": "repeat",
+      "namesAvailable": 72,
+      "requests": 300,
+      "elapsedMs": 13921,
+      "rps": 21.55,
+      "p50Ms": 87,
+      "p95Ms": 1994,
+      "maxMs": 6706,
+      "bytes": 21200205,
+      "statuses": {
+        "200": 300
+      },
+      "routes": [
+        {
+          "route": "/api/player-histories",
+          "requests": 60,
+          "p95Ms": 1041
+        },
+        {
+          "route": "/api/options",
+          "requests": 60,
+          "p95Ms": 2631
+        },
+        {
+          "route": "/api/clans",
+          "requests": 60,
+          "p95Ms": 721
+        },
+        {
+          "route": "/api/players",
+          "requests": 60,
+          "p95Ms": 919
+        },
+        {
+          "route": "/api/feed",
+          "requests": 60,
+          "p95Ms": 4362
+        }
+      ]
+    },
+    {
+      "concurrency": 4,
+      "mode": "distinct",
+      "namesAvailable": 72,
+      "requests": 90,
+      "elapsedMs": 18708,
+      "rps": 4.81,
+      "p50Ms": 160,
+      "p95Ms": 3357,
+      "maxMs": 4968,
+      "bytes": 12142046,
+      "statuses": {
+        "200": 90
+      },
+      "routes": [
+        {
+          "route": "/api/players",
+          "requests": 18,
+          "p95Ms": 2515
+        },
+        {
+          "route": "/api/player-histories",
+          "requests": 18,
+          "p95Ms": 4908
+        },
+        {
+          "route": "/api/options",
+          "requests": 18,
+          "p95Ms": 2525
+        },
+        {
+          "route": "/api/clans",
+          "requests": 18,
+          "p95Ms": 2379
+        },
+        {
+          "route": "/api/feed",
+          "requests": 18,
+          "p95Ms": 4968
+        }
+      ]
+    },
+    {
+      "concurrency": 8,
+      "mode": "distinct",
+      "namesAvailable": 72,
+      "requests": 103,
+      "elapsedMs": 16880,
+      "rps": 6.1,
+      "p50Ms": 746,
+      "p95Ms": 4285,
+      "maxMs": 8331,
+      "bytes": 14194712,
+      "statuses": {
+        "200": 103
+      },
+      "routes": [
+        {
+          "route": "/api/options",
+          "requests": 20,
+          "p95Ms": 4317
+        },
+        {
+          "route": "/api/players",
+          "requests": 21,
+          "p95Ms": 2476
+        },
+        {
+          "route": "/api/player-histories",
+          "requests": 21,
+          "p95Ms": 4389
+        },
+        {
+          "route": "/api/clans",
+          "requests": 21,
+          "p95Ms": 2534
+        },
+        {
+          "route": "/api/feed",
+          "requests": 20,
+          "p95Ms": 8331
+        }
+      ]
+    }
+  ],
+  "stressStages": [
+    {
+      "concurrency": 16,
+      "mode": "distinct",
+      "run": "first",
+      "requests": 37,
+      "elapsedMs": 9992,
+      "rps": 3.7,
+      "p50Ms": 3594,
+      "p95Ms": 7802,
+      "maxMs": 9609,
+      "statuses": {
+        "200": 31,
+        "503": 6
+      },
+      "note": "Error bodies were not captured in this first run."
+    },
+    {
+      "concurrency": 12,
+      "mode": "distinct",
+      "namesAvailable": 72,
+      "requests": 119,
+      "elapsedMs": 22279,
+      "rps": 5.34,
+      "p50Ms": 938,
+      "p95Ms": 5166,
+      "maxMs": 8437,
+      "bytes": 16950357,
+      "statuses": {
+        "200": 119
+      },
+      "errors": [],
+      "routes": [
+        {
+          "route": "/api/options",
+          "requests": 23,
+          "p95Ms": 4670
+        },
+        {
+          "route": "/api/players",
+          "requests": 24,
+          "p95Ms": 5037
+        },
+        {
+          "route": "/api/clans",
+          "requests": 24,
+          "p95Ms": 4882
+        },
+        {
+          "route": "/api/player-histories",
+          "requests": 24,
+          "p95Ms": 5166
+        },
+        {
+          "route": "/api/feed",
+          "requests": 24,
+          "p95Ms": 8083
+        }
+      ],
+      "run": "first"
+    },
+    {
+      "concurrency": 16,
+      "mode": "distinct",
+      "namesAvailable": 72,
+      "requests": 125,
+      "elapsedMs": 17859,
+      "rps": 7,
+      "p50Ms": 1495,
+      "p95Ms": 5118,
+      "maxMs": 6036,
+      "bytes": 17331906,
+      "statuses": {
+        "200": 125
+      },
+      "errors": [],
+      "routes": [
+        {
+          "route": "/api/players",
+          "requests": 25,
+          "p95Ms": 5068
+        },
+        {
+          "route": "/api/player-histories",
+          "requests": 25,
+          "p95Ms": 5843
+        },
+        {
+          "route": "/api/feed",
+          "requests": 25,
+          "p95Ms": 5206
+        },
+        {
+          "route": "/api/clans",
+          "requests": 25,
+          "p95Ms": 5064
+        },
+        {
+          "route": "/api/options",
+          "requests": 25,
+          "p95Ms": 3825
+        }
+      ],
+      "run": "repeat"
+    },
+    {
+      "concurrency": 24,
+      "mode": "distinct",
+      "namesAvailable": 72,
+      "requests": 26,
+      "elapsedMs": 8404,
+      "rps": 3.09,
+      "p50Ms": 2935,
+      "p95Ms": 6316,
+      "maxMs": 8389,
+      "bytes": 2773520,
+      "statuses": {
+        "200": 16,
+        "503": 10
+      },
+      "errors": [
+        {
+          "route": "/api/players",
+          "status": 503,
+          "error": "The app is busy. Please retry shortly.",
+          "retryAfter": "5"
+        },
+        {
+          "route": "/api/clans",
+          "status": 503,
+          "error": "The app is busy. Please retry shortly.",
+          "retryAfter": "5"
+        },
+        {
+          "route": "/api/player-histories",
+          "status": 503,
+          "error": "The app is busy. Please retry shortly.",
+          "retryAfter": "5"
+        },
+        {
+          "route": "/api/players",
+          "status": 503,
+          "error": "The app is busy. Please retry shortly.",
+          "retryAfter": "5"
+        },
+        {
+          "route": "/api/options",
+          "status": 503,
+          "error": "The app is busy. Please retry shortly.",
+          "retryAfter": "5"
+        },
+        {
+          "route": "/api/feed",
+          "status": 503,
+          "error": "The app is busy. Please retry shortly.",
+          "retryAfter": "5"
+        },
+        {
+          "route": "/api/clans",
+          "status": 503,
+          "error": "The app is busy. Please retry shortly.",
+          "retryAfter": "5"
+        },
+        {
+          "route": "/api/players",
+          "status": 503,
+          "error": "The app is busy. Please retry shortly.",
+          "retryAfter": "5"
+        },
+        {
+          "route": "/api/options",
+          "status": 503,
+          "error": "The app is busy. Please retry shortly.",
+          "retryAfter": "5"
+        },
+        {
+          "route": "/api/player-histories",
+          "status": 503,
+          "error": "The app is busy. Please retry shortly.",
+          "retryAfter": "5"
+        }
+      ],
+      "routes": [
+        {
+          "route": "/api/options",
+          "requests": 5,
+          "p95Ms": 5479
+        },
+        {
+          "route": "/api/players",
+          "requests": 6,
+          "p95Ms": 5478
+        },
+        {
+          "route": "/api/clans",
+          "requests": 5,
+          "p95Ms": 6256
+        },
+        {
+          "route": "/api/player-histories",
+          "requests": 5,
+          "p95Ms": 6316
+        },
+        {
+          "route": "/api/feed",
+          "requests": 5,
+          "p95Ms": 8389
+        }
+      ],
+      "run": "first"
+    }
+  ]
+}

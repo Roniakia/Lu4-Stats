@@ -1,0 +1,18 @@
+# syntax=docker/dockerfile:1
+FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS collector-dependencies
+WORKDIR /app
+COPY database/package*.json ./
+RUN npm ci --omit=dev
+COPY package*.json ./collector/
+RUN cd collector && npm ci --omit=dev
+# These locked dependencies are JavaScript. Browser/native runtime comes from
+# the target-platform Playwright base, so cross-builds need no CPU emulator.
+FROM mcr.microsoft.com/playwright:v1.63.0-noble
+WORKDIR /app
+COPY --from=collector-dependencies --chown=pwuser:pwuser /app ./
+COPY --chown=pwuser:pwuser parser.js config.js logger.js servers.js ./collector/
+COPY --chown=pwuser:pwuser database ./database
+COPY --chown=pwuser:pwuser scripts/collector.mjs ./scripts/collector.mjs
+USER pwuser
+ENV COLLECTOR_MODULE=/app/collector/parser.js TZ=UTC
+CMD ["node","scripts/collector.mjs"]

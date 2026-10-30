@@ -1,0 +1,13 @@
+import pg from 'pg';
+import { ingestCollection,servers } from '../database/core.mjs';
+const revision=process.argv[2];
+if(!/^[a-f0-9]{40}$/.test(revision??'')) throw new Error('Provide a pinned 40-character data-branch commit SHA');
+const args=process.argv.slice(3),option=name=>{const i=args.indexOf('--'+name);return i<0?undefined:args[i+1];};
+const selected=option('server'),from=option('from'),to=option('to'),limit=Number(option('limit')??Infinity);
+if(selected&&!servers.includes(selected)||from&&!Number.isFinite(Date.parse(from))||to&&!Number.isFinite(Date.parse(to))||!(limit>0)||limit!==Infinity&&!Number.isInteger(limit))throw new Error('Invalid import selection');
+let processed=0;
+const base=new URL(`https://raw.githubusercontent.com/Roniakia/Lu4-Stats/${revision}/snapshots/`);
+const read=async path=>{const url=new URL(path,base);if(url.origin!==base.origin||!url.pathname.startsWith(base.pathname))throw new Error('Invalid source URL');const response=await fetch(url,{signal:AbortSignal.timeout(30000)});if(!response.ok)throw new Error(`Source HTTP ${response.status}`);const parts=[];let bytes=0;for await(const chunk of response.body){bytes+=chunk.length;if(bytes>50*1024*1024)throw new Error('Source too large');parts.push(chunk);}return JSON.parse(Buffer.concat(parts).toString('utf8'));};
+if(!process.env.IMPORT_DATABASE_URL&&!process.env.DATABASE_URL)throw new Error('Set IMPORT_DATABASE_URL or DATABASE_URL explicitly');
+const client=new pg.Client({connectionString:process.env.IMPORT_DATABASE_URL??process.env.DATABASE_URL,connectionTimeoutMillis:5000,statement_timeout:30000});await client.connect();
+try{const manifest=await read('index.json');if(manifest.schemaVersion!==2||!Array.isArray(manifest.partitions))throw new Error('Invalid manifest');for(const partition of manifest.partitions){if(selected&&partition.server!==selected)continue;const index=await read(partition.url);if(index.schemaVersion!==1||!Array.isArray(index.snapshots))throw new Error('Invalid partition');for(const entry of index.snapshots){if(processed>=limit)break;if(from&&Date.parse(entry.capturedAt)<Date.parse(from)||to&&Date.parse(entry.capturedAt)>Date.parse(to))continue;const snapshot=await read(entry.url);if(snapshot.serverKey!==partition.server||snapshot.capturedAt!==entry.capturedAt)throw new Error('Source identity mismatch');const result=await ingestCollection(client,{...snapshot,id:entry.id});await client.query("INSERT INTO import_sources(collection_id,revision,url) VALUES($1,$2,$3) ON CONFLICT DO NOTHING",[entry.id,revision,new URL(entry.url,base).href]);processed++;console.log(JSON.stringify({...result,revision}));}}}finally{await client.end();}
