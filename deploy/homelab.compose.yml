@@ -37,6 +37,14 @@ services:
       COLLECTOR_DATABASE_URL: ${COLLECTOR_DATABASE_URL:?Set limited writer connection}
       COLLECTION_INTERVAL_SECONDS: 900
       COLLECTION_TIMEOUT_SECONDS: 600
+      SNAPSHOT_STATE_DIRECTORY: /state
+      SNAPSHOT_GIT_REMOTE: ${SNAPSHOT_GIT_REMOTE:-git@github.com:Roniakia/Lu4-Stats.git}
+      SNAPSHOT_GIT_BRANCH: ${SNAPSHOT_GIT_BRANCH:-data}
+    volumes:
+      - ${SNAPSHOT_STATE_DIRECTORY:?Set persistent snapshot Git/outbox directory}:/state
+      - ${GITHUB_SSH_KEY_PATH:?Set publisher deploy key path}:/run/secrets/github_deploy_key:ro
+    tmpfs:
+      - /run/publisher-ssh:size=16777216
     depends_on:
       database: {condition: service_healthy}
     shm_size: 512m

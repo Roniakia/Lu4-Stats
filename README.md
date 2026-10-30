@@ -16,7 +16,7 @@ All images use this repository alone. Generated credentials remain local and pri
 
 ## Repository scope
 
-This branch contains only the parser, database, migrations, import/archive/export/backup tools, deployment configuration and their tests. It has no Next.js/UI application, GitHub publishing job, SSH deploy-key machinery or legacy publisher Docker files. Previous publishing code remains in the original repository branches/history; running containers are not changed by this checkout. Use deploy/homelab.compose.yml explicitly for the new stack.
+This branch contains only the parser, database, migrations, import/archive/export/backup tools, deployment configuration and their tests. It has no Next.js/UI application or standalone legacy publisher. The collector now includes durable Git snapshot publication before database ingestion; see [durable snapshot operations](deploy/DURABLE-SNAPSHOTS.md). Previous publishing code remains in the original repository branches/history; running containers are not changed by this checkout. Use deploy/homelab.compose.yml explicitly for the new stack.
 
 ## Tests
 
