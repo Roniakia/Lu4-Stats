@@ -297,3 +297,17 @@ Do not chown restored archive directories recursively without reviewing ownershi
 - App unavailable: check cloud container, OOM/restart counts, tunnel, DB readiness and collection freshness. Home outage stops reads and collection; it remains a single point of failure.
 - Backups missing: inspect scheduled job exit/logs, free disk, private secret access and CrashPlan upload status. Never delete the database volume as a repair attempt.
 - Pending: helper publication/installation, scheduled job validation, retention policy and pruning, backup age/disk alerts, off-host restore, reboot test, heavy-load measurement, domain/HTTPS and hardened public request controls. Do not equate basic smoke success with full reliability.
+
+## Runtime update, 2026-10-30
+
+The durable collector replaces the separate parser/publisher jobs. See
+[DURABLE-SNAPSHOTS.md](DURABLE-SNAPSHOTS.md) for the verified handoff, local commits,
+image, failure tests and rollback. The active source is now
+`/mnt/user/appdata/lu4-stats-v2/current`; use
+`/mnt/user/appdata/lu4-stats-v2/lu4 ps` and
+`/mnt/user/appdata/lu4-stats-v2/lu4 logs --tail=100 collector`.
+Earlier commands tied to the old `repository` checkout do not select the new
+persistent-state configuration. Preserve and back up
+`/mnt/user/appdata/lu4-stats-v2/state/snapshots` (Git checkout and outbox).
+The pipeline order is local durable commit, GitHub push, then DB ingestion.
+Do not restart the retired standalone publisher alongside it.

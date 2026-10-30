@@ -73,3 +73,37 @@ IDs, external branch divergence and a completed server preceding a parser failur
 Docker smoke checks cover non-root browser execution and OS-lock restart behavior.
 Native DB/restore tests require the existing disposable `TEST_DATABASE_URL`; never
 point those tests at production.
+
+## Verified homelab handoff
+
+Deployed 2026-10-30 from local commit `4810878` (code branch not pushed): image
+`lu4-collector:durable-4810878`, image ID
+`sha256:ac60bd2e91f784ddd536c5b5d98bd901392b6f988ecd2782f1a3e0e7073a8933`.
+Active source is `/mnt/user/appdata/lu4-stats-v2/current` → `releases/4810878`.
+Use `/mnt/user/appdata/lu4-stats-v2/lu4` as the Compose wrapper; it selects the active
+source, protected env file and private DB override. Earlier runbook commands using
+the old `repository/deploy/homelab.compose.yml` do not select the durable runtime.
+
+The former standalone publisher is stopped, restart policy disabled, and placed in
+the explicit `retired-publisher` Compose profile so default startup does not restore
+it. Its files/image are retained for rollback. The new collector has
+`unless-stopped` restart policy and the persistent snapshot bind mount. No DB
+container, schema or role was replaced during handoff.
+
+Native AMD64 checks passed against a disposable PostgreSQL database with the limited
+collector role: non-root offline Chromium; local Git push followed by deliberate
+DB connection refusal; retained four-file outbox; restart recovery without parsing;
+exactly four DB collections after idempotent replay and empty outbox. Kernel flock
+rejected a concurrent writer and recovered after SIGKILL. Disposable containers/DB
+were removed after saving their logs.
+
+First live capture produced four local commits (`40557a4`, `b9b1395`, `4c70170`,
+`07d1cc5`). Push of `07d1cc561ce828b32ba002f6292fef847367f945` succeeded at
+2026-10-30T21:58:01.440Z. Only afterward, all four DB ingestions completed between
+21:58:01.804Z and 21:58:02.781Z. The outbox was empty. First-run logs are saved at
+`/mnt/user/appdata/lu4-stats-v2/state/durable-first-run-20261030.log`.
+
+Existing homelab env and standalone publisher Compose config were backed up with
+`.before-durable-20261030` suffixes. Boot-time WireGuard startup was enabled earlier
+in this incident; an actual host reboot and off-host backup of the new Git/outbox
+state remain unverified.
