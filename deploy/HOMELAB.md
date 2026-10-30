@@ -1,3 +1,7 @@
+> Runtime order updated 2026-10-30: [durable snapshot operations](DURABLE-SNAPSHOTS.md).
+> Configure persistent snapshot state and the GitHub deploy key. Use one collector
+> for commit → push → database; stop the standalone publisher during handoff.
+
 # Homelab startup
 
 This starts PostgreSQL and the database-writing collector. Run commands from the Lu4-Stats repository root. Requires Docker Compose v2, Bash and OpenSSL. Keep your current publisher running until a deliberate collector handoff; starting the new collector also fetches the game website, so avoid overlapping parser schedules.

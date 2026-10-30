@@ -842,7 +842,7 @@ export async function fetchSnapshot(serverKey) {
   }
 }
 
-export async function fetchAllSnapshots() {
+export async function fetchAllSnapshots({ onSnapshot } = {}) {
   log('parser', 'Launching Chromium');
   const browser = await launchBrowser();
   const context = await browser.newContext({ userAgent: USER_AGENT });
@@ -921,6 +921,8 @@ export async function fetchAllSnapshots() {
             selector: 'MW2 rendered server selector',
           },
         });
+        // Persist each completed server before requesting the next one.
+        if (onSnapshot) await onSnapshot(results.at(-1));
       } finally {
         await page.close();
       }

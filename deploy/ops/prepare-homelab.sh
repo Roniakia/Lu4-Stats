@@ -32,6 +32,8 @@ ADMIN_DATABASE_URL=postgresql://lu4_admin:\${ADMIN_DATABASE_PASSWORD}@database:5
 ARCHIVE_DIRECTORY=$state_directory/archives
 EXPORT_DIRECTORY=$state_directory/exports
 BACKUP_DIRECTORY=$state_directory/backups
+SNAPSHOT_STATE_DIRECTORY=$state_directory/snapshots
+GITHUB_SSH_KEY_PATH=$state_directory/secrets/github-deploy-key
 EOF
 printf 'Created protected env file: %s\nStorage: %s\n' "$env_file" "$state_directory"
 echo 'Follow deploy/HOMELAB.md to build/load images, initialize permissions/schema/roles, then start collection.'
