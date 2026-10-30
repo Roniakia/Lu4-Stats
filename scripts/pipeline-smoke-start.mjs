@@ -3,10 +3,11 @@ if(!/^lu4_pipeline_check_[a-z0-9_]+$/.test(process.env.PIPELINE_FIXTURE_DATABASE
 const url=new URL(process.env.COLLECTOR_DATABASE_URL);url.pathname='/'+process.env.PIPELINE_FIXTURE_DATABASE;
 if(process.env.PIPELINE_FIXTURE_PHASE==='offline')url.port='1';
 process.env.COLLECTOR_DATABASE_URL=url.href;
-let restored=0;const log=console.log;
+const log=console.log;
 console.log=(text,...args)=>{
  log(text,...args);let event;try{event=JSON.parse(text);}catch{return;}
  if(process.env.PIPELINE_FIXTURE_PHASE==='offline'&&event.event==='pipeline-failed'&&event.stage==='push-or-database')process.kill(process.pid,'SIGTERM');
- if(process.env.PIPELINE_FIXTURE_PHASE==='recover'&&event.event==='snapshot-database-complete'&&++restored===4)process.kill(process.pid,'SIGTERM');
+ if(process.env.PIPELINE_FIXTURE_PHASE==='recover'&&event.event==='snapshot-recovery-complete')process.kill(process.pid,'SIGTERM');
+ if(process.env.PIPELINE_FIXTURE_PHASE==='recover'&&event.event==='pipeline-failed')process.exitCode=1;
 };
 await import('./collector.mjs');

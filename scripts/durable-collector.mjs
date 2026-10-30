@@ -29,8 +29,12 @@ while(!stopping){
  try{
   if(!initialized){await pipeline.initialize();initialized=true;}
   // Retry retained data without contacting the source or waiting for the next scrape.
-  try{await pipeline.flush();}catch(error){failed('retry-push-or-database',error);}
-  if(Date.now()>=nextCollection&&!stopping){
+  const hadPending=(await pipeline.pending()).length>0;let recovered=false;
+  try{await pipeline.flush();recovered=hadPending;}catch(error){failed('retry-push-or-database',error);}
+  // Give recovered data its own tick; a restart can finish solely from the outbox.
+  // A failed retry still permits scheduled collection and further local commits.
+  if(recovered)emit({event:'snapshot-recovery-complete'});
+  if(!recovered&&Date.now()>=nextCollection&&!stopping){
    let sourceSucceeded=false;const captured=new Set();let delay=interval*1000;
    try{
     const onSnapshot=async snapshot=>{const id=validateCollection({...snapshot,id:undefined}).id;await pipeline.capture(snapshot);captured.add(id);};
