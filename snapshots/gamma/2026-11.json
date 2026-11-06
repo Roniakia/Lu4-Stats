@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "gamma:2026-11",
   "server": "gamma",
-  "updatedAt": "2026-11-06T17:11:37.551Z",
+  "updatedAt": "2026-11-06T17:28:50.168Z",
   "snapshots": [
     {
       "id": "gamma-2026-11-01T00-01-10-632Z",
@@ -2353,6 +2353,11 @@
       "id": "gamma-2026-11-06T17-11-37-551Z",
       "capturedAt": "2026-11-06T17:11:37.551Z",
       "url": "gamma/gamma-2026-11-06T17-11-37-551Z.json"
+    },
+    {
+      "id": "gamma-2026-11-06T17-28-50-168Z",
+      "capturedAt": "2026-11-06T17:28:50.168Z",
+      "url": "gamma/gamma-2026-11-06T17-28-50-168Z.json"
     }
   ]
 }
