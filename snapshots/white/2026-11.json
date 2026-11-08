@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "white:2026-11",
   "server": "white",
-  "updatedAt": "2026-11-08T00:31:37.894Z",
+  "updatedAt": "2026-11-08T00:48:52.879Z",
   "snapshots": [
     {
       "id": "white-2026-11-01T00-01-39-912Z",
@@ -2898,6 +2898,11 @@
       "id": "white-2026-11-08T00-31-37-894Z",
       "capturedAt": "2026-11-08T00:31:37.894Z",
       "url": "white/white-2026-11-08T00-31-37-894Z.json"
+    },
+    {
+      "id": "white-2026-11-08T00-48-52-879Z",
+      "capturedAt": "2026-11-08T00:48:52.879Z",
+      "url": "white/white-2026-11-08T00-48-52-879Z.json"
     }
   ]
 }
