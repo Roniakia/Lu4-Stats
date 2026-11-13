@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-11-13T23:54:15.814Z",
+  "updatedAt": "2026-11-13T23:54:42.839Z",
   "partitions": [
     {
       "id": "black:2026-09",
@@ -35,7 +35,7 @@
     {
       "id": "carmine:2026-11",
       "server": "carmine",
-      "updatedAt": "2026-11-13T23:37:45.700Z",
+      "updatedAt": "2026-11-13T23:54:42.690Z",
       "url": "carmine/2026-11.json"
     },
     {
