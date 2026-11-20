@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-11-20T03:14:25.437Z",
+  "updatedAt": "2026-11-20T03:14:52.190Z",
   "partitions": [
     {
       "id": "black:2026-09",
@@ -71,7 +71,7 @@
     {
       "id": "white:2026-11",
       "server": "white",
-      "updatedAt": "2026-11-20T02:57:55.120Z",
+      "updatedAt": "2026-11-20T03:14:51.994Z",
       "url": "white/2026-11.json"
     }
   ]
