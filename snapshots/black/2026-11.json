@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "black:2026-11",
   "server": "black",
-  "updatedAt": "2026-11-22T21:45:04.177Z",
+  "updatedAt": "2026-11-22T22:02:00.773Z",
   "snapshots": [
     {
       "id": "black-2026-11-01T00-02-09-739Z",
@@ -9178,6 +9178,11 @@
       "id": "black-2026-11-22T21-45-04-177Z",
       "capturedAt": "2026-11-22T21:45:04.177Z",
       "url": "black/black-2026-11-22T21-45-04-177Z.json"
+    },
+    {
+      "id": "black-2026-11-22T22-02-00-773Z",
+      "capturedAt": "2026-11-22T22:02:00.773Z",
+      "url": "black/black-2026-11-22T22-02-00-773Z.json"
     }
   ]
 }
