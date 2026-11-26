@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "carmine:2026-11",
   "server": "carmine",
-  "updatedAt": "2026-11-26T02:56:17.042Z",
+  "updatedAt": "2026-11-26T03:13:13.828Z",
   "snapshots": [
     {
       "id": "carmine-2026-11-01T00-02-40-186Z",
@@ -10538,6 +10538,11 @@
       "id": "carmine-2026-11-26T02-56-17-042Z",
       "capturedAt": "2026-11-26T02:56:17.042Z",
       "url": "carmine/carmine-2026-11-26T02-56-17-042Z.json"
+    },
+    {
+      "id": "carmine-2026-11-26T03-13-13-828Z",
+      "capturedAt": "2026-11-26T03:13:13.828Z",
+      "url": "carmine/carmine-2026-11-26T03-13-13-828Z.json"
     }
   ]
 }
